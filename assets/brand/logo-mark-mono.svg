@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="t">
+  <title id="t">Kun Insan (Be Human) mark, single colour</title>
+  <desc>A human figure (head and shoulders) carried by an open arc; together they complete one circle.</desc>
+  <g fill="none" stroke-width="56" stroke-linecap="round">
+    <path stroke="currentColor" d="M396 313A140 140 0 0 1 116 313"/>
+    <path stroke="currentColor" d="M151.96 219.32A140 140 0 0 1 360.04 219.32"/>
+  </g>
+  <circle fill="currentColor" cx="256" cy="77" r="46"/>
+</svg>

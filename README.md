@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/brand/logo-dark.svg">
+    <img src="assets/brand/logo.svg" alt="كن إنسان — Kun Insan" width="420">
+  </picture>
+</p>
+
 # كن إنسان — Kun Insan (Be Human)
 
 > **For all humans. No race, no religion, no color. Just a greater, better Earth for all humans. And humans lead it.**
