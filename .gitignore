@@ -1,0 +1,15 @@
+# Never commit personal data or secrets
+.env
+.env.*
+*.key
+*.pem
+secrets/
+my-instance*/
+instance-*.private.md
+data/
+*.sqlite
+*.db
+.DS_Store
+node_modules/
+__pycache__/
+.venv/
