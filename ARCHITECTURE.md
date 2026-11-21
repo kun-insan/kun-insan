@@ -1,67 +1,86 @@
-# Architecture — كن إنسان engine (MVP base)
+# Architecture — كن إنسان engine
 
-This document describes the open design of the engine. It's the reference for anyone who wants to understand or build on it.
+The open design of the engine. Diagram: [diagrams/engine-architecture-v0.1.drawio](diagrams/engine-architecture-v0.1.drawio) (open with [draw.io](https://app.diagrams.net)).
 
 ## Core idea: one engine, many instances
 
-Every user gets their own **instance** of the same engine. An instance starts **empty**, with only guardrails, and becomes personal as it learns. The founder's instance is the first one. The engine is always kept separate from any user's data.
+Every user gets their own **instance** of the same engine. An instance starts **empty**, with only guardrails, and becomes personal as it learns. The founder's instance is user #1. The engine is always kept separate from any user's data, so it can be copied without anyone's personal information.
 
-## Components
+**The product is the memory structure + architecture + guardrails. The model is swappable.** See [docs/runtime.md](docs/runtime.md).
 
-### 1. Guardrails
-Always-on rules that no user, skill or memory can override: honesty, safety, human rights, privacy, and age-appropriate limits (separate versions per age group are planned). Guardrails define what the AI will never do and when it must say "I can't do this."
+## Layers
 
-### 2. Orchestrator
-The main loop. It listens to the user, decides what each piece of information is, and routes it:
+### 0. Guardrails (always on)
+Fixed rules that never change, whatever the engine learns. Enforced in orchestrator code, not only in a prompt, so they hold for any model. → [docs/guardrails.md](docs/guardrails.md)
+
+### 1. Inputs
+- Voice notes (so it understands feeling, not only words)
+- Text / chat
+- Meetings (listen-only attendee)
+- Connected apps (mail, calendar, files, notes, messaging), only with the user's permission
+- Onboarding questions (first session) → [templates/onboarding-questions.md](templates/onboarding-questions.md)
+- Human-first onboarding call (recorded with consent, AI note-taker)
+- Periodic sync: yes / no / "changed to…"
+
+### 2. Orchestrator (main agent)
+Listens, learns, and routes each piece of information:
 - a fact or idea → the right **memory block**
 - a task → the right **skill**, within its permission level
-- anything doubtful → the **auditor**
+- anything doubtful or conflicting → the **auditor**
 
-### 3. Memory blocks
-Empty, typed slots (e.g. work, goals, people, preferences, routines). Each entry is stored with:
-- date
-- source: *stated* by the user or *observed*
-- confidence and review cadence (some facts are stable, others change and get re-confirmed)
+→ [docs/blocks/orchestrator.md](docs/blocks/orchestrator.md)
 
-### 4. Auditor / Watcher
-A dedicated block that acts like an auditor. It filters anything conflicting, wrong or unclear, and raises it to the user instead of silently guessing.
+### 3. Memory blocks (one topic each)
+Small empty slots that fill as the engine learns the user. Default set: Profile & identity · Goals & mission · Finance · Work · Relationships & family · Routine & health · Personality Notes · Agreed Advice.
 
-### 5. Skills (4 permission levels)
-Capabilities the orchestrator can call. Each skill runs at a permission level the user grants:
+Every entry carries: **date · source · stated vs inferred · stable vs changing · review age · confidence**. The newer entry wins; the old one is kept as history. Format: [schema/memory-entry.schema.json](schema/memory-entry.schema.json). → [docs/blocks/memory-blocks.md](docs/blocks/memory-blocks.md)
+
+### 4. Auditor (the watcher)
+Flags anything conflicting, wrong or unclear and puts it in a **review queue** for the user. It never corrects on its own. → [docs/blocks/auditor.md](docs/blocks/auditor.md)
+
+### 5. Predictions — the life coach (works from day one)
+Quietly predicts what the user will say or decide, logs hit or miss per topic, and turns every piece of advice the user agreed to into a plan of small next steps. Permission level 1 (suggest) forever. → [docs/blocks/predictions.md](docs/blocks/predictions.md)
+
+### 6. Unlock gate
+A skill unlocks when Predictions reaches **8 correct out of 10 within two weeks** for that skill's topic. Accuracy, not fill level. → [docs/rules.md](docs/rules.md)
+
+### 7. Skills / sub-agents (do, not only remember)
+- Meeting companion (first use case) → [docs/use-cases/meeting-companion.md](docs/use-cases/meeting-companion.md)
+- Finance skill (locked until earned)
+- Feel AI (locked until earned) → [docs/blocks/feel-ai.md](docs/blocks/feel-ai.md)
+- More skills, each unlocked by accuracy (free or as perks/paid tiers)
+
+Each skill runs on the **permission ladder**:
 
 | Level | Name | Can do |
 |---|---|---|
-| 1 | Observe | Read and listen only (e.g. attend a meeting silently) |
-| 2 | Advise | Summarize, recommend, draft |
-| 3 | Act with approval | Prepare an action; the user confirms |
-| 4 | Act within limits | Act on its own inside limits the user set |
+| 1 | Suggest | Observe, listen, advise. Nothing leaves without the user. |
+| 2 | Draft | Prepare drafts the user reviews and sends. |
+| 3 | Act with approval | Prepare an action; the user confirms each time. |
+| 4 | Act alone | Act inside limits the user set. |
 
-### 6. Milestones (earned abilities)
-Abilities unlock by **proven accuracy** for that user, not by how full a block is. This keeps quality high and makes the user part of the process: you get out what you put in.
+Start only with actions that can be undone.
+
+### 8. Outputs to the user
+- Summary + the user's own action points
+- Alerts (something off in a meeting or in the data)
+- A plan of small steps + the next skill to unlock, in the "I don't know" format (tell me / give me access to / look at)
+- Personality Notes reminders → [docs/blocks/personality-notes.md](docs/blocks/personality-notes.md)
+- **Full visibility:** see, edit and delete every block
+
+### 9. Runtime & data layer
+- Model layer: swappable; only models that pass the **Kun Insan Certified** benchmark
+- Source of truth: a user-owned store (documents/notes today → local DB + vector store), encrypted backup
+- Privacy: user data private; one clearly defined section shared with the project, with separate consent
+- Hardware guide by need: privacy / small / going big. The user chooses and owns it.
 
 ## Protocols
 
-- **Onboarding questions:** every new user starts with a fixed set of questions so the first output is already useful.
-- **"I don't know" protocol:** when information is missing, the AI says so and asks for exactly what it needs: *tell me…* / *give me access to…* / *look at 1, 2, 3…*
-- **Live sync:** on a regular cadence the user confirms which facts still hold and which have changed.
-
-## First use case
-
-**Meeting companion.** The AI attends meetings in listen-only mode (level 1) with full background from one source of truth, then sends the user a summary, their action points, and an alert if something was off. Acting after the meeting (levels 3–4) comes later, through milestones.
+- **"I don't know" protocol:** when information is missing, say so and ask for exactly what's needed: *tell me 1, 2, 3* / *give me access to 1, 2, 3* / *look at 1, 2, 3*.
+- **Onboarding:** a fixed first-session question list so the first output is already useful, plus one skill (Predictions) that works from day one.
+- **Sync:** a light review at set intervals; changing facts are re-confirmed on their own cadence.
+- **Always back to source:** every answer can point to where a fact came from.
 
 ## Data and privacy
 
-- User data is private to the user. Only a clearly defined section, with separate consent, is shared with the project.
-- Separate consent for data use and for anything published.
-- Built on standard legal frameworks and existing, audited cloud security services.
-- **No personal data ever lives in this repository.**
-
-## What's open and what isn't (for now)
-
-| Open (this repo) | Invited builders only |
-|---|---|
-| Vision, principles, architecture | Engine implementation |
-| Interfaces and specs | Guardrail tuning and evaluation sets |
-| Roadmap and discussions | Hosted service and infrastructure |
-
-As the engine matures, more moves into the open.
+**No personal data ever lives in this repository.** Synthetic examples only. → [docs/privacy-and-consent.md](docs/privacy-and-consent.md)

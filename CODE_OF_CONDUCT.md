@@ -2,6 +2,8 @@
 
 كن إنسان means "be human". That's the standard here.
 
+For all humans. No race, no religion, no color. Just a greater, better Earth for all humans, and humans lead it.
+
 ## We expect
 
 - **Honesty and transparency.** Say what you know, say what you don't.

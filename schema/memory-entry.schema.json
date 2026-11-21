@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/kun-insan/kun-insan/schema/memory-entry.schema.json",
+  "title": "Kun Insan memory entry",
+  "type": "object",
+  "required": ["id", "block", "content", "date", "source", "origin", "stability"],
+  "properties": {
+    "id": { "type": "string" },
+    "block": {
+      "type": "string",
+      "description": "Memory block name",
+      "examples": ["profile", "goals", "finance", "work", "relationships", "routine_health", "personality_notes", "agreed_advice"]
+    },
+    "content": { "type": "string", "description": "The fact, in the user's words where possible" },
+    "date": { "type": "string", "format": "date" },
+    "source": {
+      "type": "string",
+      "enum": ["conversation", "voice_note", "meeting", "connected_app", "sync", "onboarding"]
+    },
+    "origin": {
+      "type": "string",
+      "enum": ["stated", "inferred"],
+      "description": "stated = the user said it; inferred = the engine concluded it. Inferred never overrides stated."
+    },
+    "stability": { "type": "string", "enum": ["stable", "changing"] },
+    "review_every_days": {
+      "type": ["integer", "null"],
+      "description": "Only for changing facts. Defaults: finance 7, goals 30, relationships 90."
+    },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "sensitive": {
+      "type": "boolean",
+      "description": "Health, finances, beliefs etc. Requires separate consent and is never shared."
+    },
+    "history": {
+      "type": "array",
+      "description": "Older versions; newer wins, history stays",
+      "items": {
+        "type": "object",
+        "properties": {
+          "content": { "type": "string" },
+          "date": { "type": "string", "format": "date" }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
