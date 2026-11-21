@@ -59,6 +59,7 @@ Orchestrator ──▶ Memory blocks (one topic each; every fact dated, sourced,
 | [docs/privacy-and-consent.md](docs/privacy-and-consent.md) | Data, consent, legal frameworks |
 | [docs/editions/](docs/editions/) | Versions per age group |
 | [docs/use-cases/](docs/use-cases/) | First use case: meeting companion |
+| [skills/](skills/) | Human skills anyone can use, starting with [Clean My Footprint (نظّف أثري)](skills/clean-my-footprint/SKILL.md) |
 | [prompts/](prompts/) | System prompts (Arabic + English) |
 | [templates/](templates/) | Start your own empty instance today |
 | [schema/](schema/) | Memory entry format |
